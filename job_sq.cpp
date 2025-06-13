@@ -1,7 +1,5 @@
-
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <algorithm>
 using namespace std;
 
@@ -11,7 +9,7 @@ struct Job {
     int profit;
 };
 
-// Sort jobs by descending profit
+// Comparison function for sorting by profit (descending)
 bool compare(Job a, Job b) {
     return a.profit > b.profit;
 }
@@ -26,22 +24,27 @@ int main() {
     int n;
     file >> n;
 
-    vector<Job> jobs(n);
+    Job jobs[100]; // assuming max 100 jobs
     for (int i = 0; i < n; i++) {
         file >> jobs[i].id >> jobs[i].deadline >> jobs[i].profit;
     }
-
     file.close();
 
-    sort(jobs.begin(), jobs.end(), compare);
+    // Sort jobs by profit descending
+    sort(jobs, jobs + n, compare);
 
+    // Find max deadline
     int maxDeadline = 0;
-    for (auto j : jobs) maxDeadline = max(maxDeadline, j.deadline);
+    for (int i = 0; i < n; i++) {
+        if (jobs[i].deadline > maxDeadline)
+            maxDeadline = jobs[i].deadline;
+    }
 
-    vector<bool> slot(maxDeadline, false);
-    vector<char> result(maxDeadline, '-');
+    bool slot[100] = {false};       // max 100 time slots
+    char result[100];               // to store job IDs
     int totalProfit = 0;
 
+    // Fill slots greedily
     for (int i = 0; i < n; i++) {
         for (int j = jobs[i].deadline - 1; j >= 0; j--) {
             if (!slot[j]) {
@@ -53,12 +56,13 @@ int main() {
         }
     }
 
+    // Output scheduled jobs and total profit
     cout << "Scheduled Jobs: ";
-    for (char id : result) {
-        if (id != '-') cout << id << " ";
+    for (int i = 0; i < maxDeadline; i++) {
+        if (slot[i])
+            cout << result[i] << " ";
     }
     cout << "\nTotal Profit: " << totalProfit << endl;
 
     return 0;
 }
-
